@@ -30,6 +30,7 @@ async function main() {
 
   console.log(`Fetching token and transferring to accounts...\n`)
 
+  // Fetch deployed token
   const token = await hre.ethers.getContractAt('Token', config[chainId].token.address)
   console.log(`Token fetched: ${token.address}\n`)
 
@@ -43,12 +44,14 @@ async function main() {
   transaction = await token.transfer(investor3.address, tokens(200000))
   await transaction.wait()
 
+  console.log(`Fetching dao...\n`)
+
   // Fetch deployed dao
   const dao = await hre.ethers.getContractAt('DAO', config[chainId].dao.address)
   console.log(`DAO fetched: ${dao.address}\n`)
 
-  // Funder sends Ether to DAO treasury
-  transaction = await funder.sendTransaction({ to: dao.address, value: ether(1000) }) // 1,000 ETH
+  // Funder sends ETH to DAO treasury
+  transaction = await funder.sendTransaction({ to: dao.address, value: ether(1000) }) // 1,000 Ether
   await transaction.wait()
   console.log(`Sent funds to dao treasury...\n`)
 
@@ -83,11 +86,11 @@ async function main() {
   await transaction.wait()
 
   // Vote 1
-  transaction = await dao.connect(investor1).vote(4)
+  transaction = await dao.connect(investor2).vote(4)
   await transaction.wait()
 
   // Vote 2
-  transaction = await dao.connect(investor2).vote(4)
+  transaction = await dao.connect(investor3).vote(4)
   await transaction.wait()
 
   console.log(`Finished.\n`)
