@@ -21,7 +21,9 @@ async function main() {
   const investor1 = accounts[1]
   const investor2 = accounts[2]
   const investor3 = accounts[3]
-  const recipient = accounts[4]
+  const investor4 = accounts[4]
+  const investor5 = accounts[5]
+  const recipient = accounts[6]
 
   let transaction
 
@@ -44,6 +46,14 @@ async function main() {
   transaction = await token.transfer(investor3.address, tokens(200000))
   await transaction.wait()
 
+  transaction = await token.transfer(investor4.address, tokens(200000))
+  await transaction.wait()
+
+  transaction = await token.transfer(investor5.address, tokens(200000))
+  await transaction.wait()
+
+  console.log(`Transferred tokens to accounts...\n`)
+
   console.log(`Fetching dao...\n`)
 
   // Fetch deployed dao
@@ -60,16 +70,16 @@ async function main() {
     transaction = await dao.connect(investor1).createProposal(`Proposal ${i + 1}`, ether(100), recipient.address)
     await transaction.wait()
 
-    // Vote 1
-    transaction = await dao.connect(investor1).vote(i + 1)
+    // Up Vote 1
+    transaction = await dao.connect(investor1).upVote(i + 1)
     await transaction.wait()
 
-    // Vote 2
-    transaction = await dao.connect(investor2).vote(i + 1)
+    // Up Vote 2
+    transaction = await dao.connect(investor2).upVote(i + 1)
     await transaction.wait()
 
-    // Vote 3
-    transaction = await dao.connect(investor3).vote(i + 1)
+    // Up Vote 3
+    transaction = await dao.connect(investor3).upVote(i + 1)
     await transaction.wait()
 
     // Finalize
@@ -85,12 +95,12 @@ async function main() {
   transaction = await dao.connect(investor1).createProposal(`Proposal 4`, ether(100), recipient.address)
   await transaction.wait()
 
-  // Vote 1
-  transaction = await dao.connect(investor2).vote(4)
+  // Up Vote 1
+  transaction = await dao.connect(investor2).upVote(4)
   await transaction.wait()
 
-  // Vote 2
-  transaction = await dao.connect(investor3).vote(4)
+  // Up Vote 2
+  transaction = await dao.connect(investor3).upVote(4)
   await transaction.wait()
 
   console.log(`Finished.\n`)

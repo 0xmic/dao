@@ -3,10 +3,22 @@ import Button from 'react-bootstrap/Button'
 import { ethers } from 'ethers'
 
 const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
-  const voteHandler = async (id) => {
+  const upVoteHandler = async (id) => {
     try {
       const signer = await provider.getSigner()
-      const transaction = await dao.connect(signer).vote(id)
+      const transaction = await dao.connect(signer).upVote(id)
+      await transaction.wait()
+    } catch {
+      window.alert('User rejected or transaction reverted')
+    }
+
+    setIsLoading(true)
+  }
+
+  const downVoteHandler = async (id) => {
+    try {
+      const signer = await provider.getSigner()
+      const transaction = await dao.connect(signer).downVote(id)
       await transaction.wait()
     } catch {
       window.alert('User rejected or transaction reverted')
@@ -37,7 +49,8 @@ const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
           <th>Amount</th>
           <th>Status</th>
           <th>Total Votes</th>
-          <th>Cast Vote</th>
+          <th>Up Vote</th>
+          <th>Down Vote</th>
           <th>Finalize</th>
         </tr>
       </thead>
@@ -52,8 +65,15 @@ const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
             <td>{proposal.votes.toString()}</td>
             <td>
               {!proposal.finalized && (
-                <Button variant='primary' style={{ width: '100%' }} onClick={() => voteHandler(proposal.id)}>
-                  Vote
+                <Button variant='primary' style={{ width: '100%' }} onClick={() => upVoteHandler(proposal.id)}>
+                  Up Vote
+                </Button>
+              )}
+            </td>
+            <td>
+              {!proposal.finalized && (
+                <Button variant='primary' style={{ width: '100%' }} onClick={() => downVoteHandler(proposal.id)}>
+                  Down Vote
                 </Button>
               )}
             </td>
