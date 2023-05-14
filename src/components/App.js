@@ -83,7 +83,7 @@ function App() {
           <hr />
 
           <p className='text-center'>
-            <strong>Treasury Balance:</strong> {treasuryBalance} ETH
+            <strong>Treasury Balance:</strong> {treasuryBalance} ETH | <strong>Quorum:</strong> {quorum.toString()}
           </p>
 
           <hr />

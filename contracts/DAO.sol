@@ -51,16 +51,6 @@ contract DAO {
 		_;
 	}
 
-    // struct Proposal {
-	// 	   uint256 id;
-    //     string name;
-    //     uint256 amount;
-    //     address payable recipient;
-	//     string description;
-    // 	   int256 votes;
-	// 	   bool finalized;
-    // }
-
 	// Create proposal
     function createProposal(
         string memory _name,
