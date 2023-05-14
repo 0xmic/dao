@@ -10,12 +10,13 @@ contract DAO {
     uint256 public quorum;
 
     struct Proposal {
-		uint256 id;
+        uint256 id;
         string name;
         uint256 amount;
         address payable recipient;
-		int256 votes;
-		bool finalized;
+        string description;
+        int256 votes;
+        bool finalized;
     }
 
 	uint256 public proposalCount;
@@ -27,7 +28,8 @@ contract DAO {
 		uint id,
 		uint256 amount,
 		address recipient,
-		address creator
+		address creator,
+        string description
 	);
 
 	event UpVote(uint256 id, address investor);
@@ -49,11 +51,22 @@ contract DAO {
 		_;
 	}
 
+    // struct Proposal {
+	// 	   uint256 id;
+    //     string name;
+    //     uint256 amount;
+    //     address payable recipient;
+	//     string description;
+    // 	   int256 votes;
+	// 	   bool finalized;
+    // }
+
 	// Create proposal
     function createProposal(
         string memory _name,
         uint256 _amount,
-        address payable _recipient
+        address payable _recipient,
+        string memory _description
     ) external onlyInvestor {
 		require(address(this).balance >= _amount, "Not enough funds");
 
@@ -64,11 +77,12 @@ contract DAO {
 			_name,
 			_amount,
 			_recipient,
+            _description,
 			0,
 			false
 		);
 
-		emit Propose(proposalCount, _amount, _recipient, msg.sender);
+		emit Propose(proposalCount, _amount, _recipient, msg.sender, _description);
 	}
 
 	function upVote(uint256 _id) external onlyInvestor {
