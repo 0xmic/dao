@@ -4,11 +4,14 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 import './Token.sol';
 
+/// @title DAO Contract
+/// @notice A contract for decentralized autonomous organizations
 contract DAO {
     address owner;
     Token public token;
     uint256 public quorum;
 
+    /// @notice Structure for proposals
     struct Proposal {
         uint256 id;
         string name;
@@ -19,117 +22,108 @@ contract DAO {
         bool finalized;
     }
 
-	uint256 public proposalCount;
-	mapping(uint256 => Proposal) public proposals;
+    uint256 public proposalCount;
+    mapping(uint256 => Proposal) public proposals;
 
-	mapping(address => mapping(uint256 => bool)) public votes;
+    mapping(address => mapping(uint256 => bool)) public votes;
 
-	event Propose(
-		uint id,
-		uint256 amount,
-		address recipient,
-		address creator,
+    event Propose(
+        uint id,
+        uint256 amount,
+        address recipient,
+        address creator,
         string description
-	);
+    );
 
-	event UpVote(uint256 id, address investor);
+    event UpVote(uint256 id, address investor);
     event DownVote(uint256 id, address investor);
 
-	event Finalize(uint256 id);
+    event Finalize(uint256 id);
 
+    /// @notice Constructor for creating the DAO
+    /// @param _token The token used for the DAO
+    /// @param _quorum The minimum number of votes required for a proposal to pass
     constructor(Token _token, uint256 _quorum) {
         owner = msg.sender;
         token = _token;
         quorum = _quorum;
     }
 
-    // Allow contract to receive ether
-    receive() external payable {}
+    /// @notice Modifier to ensure the function caller is a token holder
+    modifier onlyInvestor() {
+        require(token.balanceOf(msg.sender) > 0, "Must be token holder");
+        _;
+    }
 
-	modifier onlyInvestor() {
-		require(token.balanceOf(msg.sender) > 0, "Must be token holder");
-		_;
-	}
-
-	// Create proposal
+    /// @notice Create a new proposal
+    /// @param _name The name of the proposal
+    /// @param _amount The amount of tokens requested
+    /// @param _recipient The address where funds will be sent if the proposal is approved
+    /// @param _description The details of the proposal
     function createProposal(
         string memory _name,
         uint256 _amount,
         address payable _recipient,
         string memory _description
     ) external onlyInvestor {
-		require(address(this).balance >= _amount, "Not enough funds");
+        require(token.balanceOf(address(this)) >= _amount, "Not enough funds");
 
-		proposalCount++;
+        proposalCount++;
 
-		proposals[proposalCount] = Proposal(
-			proposalCount,
-			_name,
-			_amount,
-			_recipient,
+        proposals[proposalCount] = Proposal(
+            proposalCount,
+            _name,
+            _amount,
+            _recipient,
             _description,
-			0,
-			false
-		);
+            0,
+            false
+        );
 
-		emit Propose(proposalCount, _amount, _recipient, msg.sender, _description);
-	}
+        emit Propose(proposalCount, _amount, _recipient, msg.sender, _description);
+    }
 
-	function upVote(uint256 _id) external onlyInvestor {
-		// Fetch proposal from mapping by id
-		Proposal storage proposal = proposals[_id];
+    /// @notice Upvote a proposal
+    /// @param _id The ID of the proposal
+    function upVote(uint256 _id) external onlyInvestor {
+        Proposal storage proposal = proposals[_id];
 
-		// Don't let investors vote twice
-		require(!votes[msg.sender][_id], "Investor has already voted");
+        require(!votes[msg.sender][_id], "Investor has already voted");
 
-		// update votes
-		proposal.votes += int256(token.balanceOf(msg.sender));
+        proposal.votes += int256(token.balanceOf(msg.sender));
 
-		// track that user has voted
-		votes[msg.sender][_id] = true;
+        votes[msg.sender][_id] = true;
 
-		// emit an event
-	    emit UpVote(_id, msg.sender);
-	}
+        emit UpVote(_id, msg.sender);
+    }
 
+    /// @notice Downvote a proposal
+    /// @param _id The ID of the proposal
     function downVote(uint256 _id) external onlyInvestor {
-		// Fetch proposal from mapping by id
-		Proposal storage proposal = proposals[_id];
+        Proposal storage proposal = proposals[_id];
 
-		// Don't let investors vote twice
-		require(!votes[msg.sender][_id], "Investor has already voted");
+        require(!votes[msg.sender][_id], "Investor has already voted");
 
-		// update votes
-		proposal.votes -= int256(token.balanceOf(msg.sender));
+        proposal.votes -= int256(token.balanceOf(msg.sender));
 
-		// track that user has voted
-		votes[msg.sender][_id] = true;
+        votes[msg.sender][_id] = true;
 
-		// emit an event
-		emit DownVote(_id, msg.sender);
-	}
+        emit DownVote(_id, msg.sender);
+    }
 
-	function finalizeProposal(uint256 _id) external onlyInvestor {
-		// Fetch proposal
-		Proposal storage proposal = proposals[_id];
+    /// @notice Finalize a proposal
+    /// @param _id The ID of the proposal to finalize
+    function finalizeProposal(uint256 _id) external onlyInvestor {
+        Proposal storage proposal = proposals[_id];
 
-		// Ensure proposal is not already finalized
-		require(!proposal.finalized, "Proposal has already been finalized");
+        require(!proposal.finalized, "Proposal has already been finalized");
+        require(proposal.votes >= int256(quorum), "Must reach quorum to finalize proposal");
+        require(token.balanceOf(address(this)) >= proposal.amount, "Not enough tokens in contract");
 
-		// Mark proposal as finalized
-		proposal.finalized = true;
+        require(token.transfer(proposal.recipient, proposal.amount), "Token transfer failed");
 
-		// Check that proposal has enough votes
-		require(proposal.votes >= int256(quorum), "Must reach quorum to finalize proposal");
+        proposal.finalized = true;
 
-		// Check that the contract has enough ether
-		require(address(this).balance >= proposal.amount, "Not enough ether in contract");
-
-		// Transfer funds
-		(bool sent, ) = proposal.recipient.call{ value: proposal.amount }("");
-		require(sent);
-
-		// Emit event
-		emit Finalize(_id);
-	}
+        emit Finalize(_id);
+    }
 }

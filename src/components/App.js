@@ -9,6 +9,7 @@ import Proposals from './Proposals'
 import Loading from './Loading'
 
 // ABIs: Import your contract ABIs here
+import TOKEN_ABI from '../abis/Token.json'
 import DAO_ABI from '../abis/DAO.json'
 
 // Config: Import your network config here
@@ -16,6 +17,7 @@ import config from '../config.json'
 
 function App() {
   const [provider, setProvider] = useState(null)
+  const [token, setToken] = useState(null)
   const [dao, setDao] = useState(null)
   const [treasuryBalance, setTreasuryBalance] = useState(0)
 
@@ -34,11 +36,14 @@ function App() {
     setProvider(provider)
 
     // Initiate contracts
+    const token = new ethers.Contract(config[31337].token.address, TOKEN_ABI, provider)
+    setToken(token)
+
     const dao = new ethers.Contract(config[31337].dao.address, DAO_ABI, provider)
     setDao(dao)
 
     // Fetch treasury balance
-    let treasuryBalance = await provider.getBalance(dao.address)
+    let treasuryBalance = await token.balanceOf(dao.address)
     treasuryBalance = ethers.utils.formatUnits(treasuryBalance, 18)
     setTreasuryBalance(treasuryBalance)
 
@@ -59,7 +64,9 @@ function App() {
     setProposals(items)
 
     // Fetch quorum
-    setQuorum(await dao.quorum())
+    let quorum = await dao.quorum()
+    quorum = ethers.utils.formatUnits(quorum, 18)
+    setQuorum(quorum)
 
     // Fetch user votes for each proposal
     let userVotes = {}
@@ -93,7 +100,8 @@ function App() {
           <hr />
 
           <p className='text-center'>
-            <strong>Treasury Balance:</strong> {treasuryBalance} ETH | <strong>Quorum:</strong> {quorum.toString()}
+            <strong>Treasury Balance:</strong> {treasuryBalance} Crypto Tokens (CT) | <strong>Quorum:</strong>{' '}
+            {quorum.toString()} Crypto Tokens (CT)
           </p>
 
           <hr />

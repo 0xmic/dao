@@ -11,8 +11,6 @@ const tokens = (n) => {
   return hre.ethers.utils.parseUnits(n.toString(), 'ether')
 }
 
-const ether = tokens
-
 async function main() {
   console.log(`Fetching accounts & network...\n`)
 
@@ -36,7 +34,7 @@ async function main() {
   const token = await hre.ethers.getContractAt('Token', config[chainId].token.address)
   console.log(`Token fetched: ${token.address}\n`)
 
-  // Send tokens to investors - each one gets 20%
+  // Send tokens to investors - 50% (each investor gets 10%)
   transaction = await token.transfer(investor1.address, tokens(200000))
   await transaction.wait()
 
@@ -54,22 +52,19 @@ async function main() {
 
   console.log(`Transferred tokens to accounts...\n`)
 
-  console.log(`Fetching dao...\n`)
-
   // Fetch deployed dao
   const dao = await hre.ethers.getContractAt('DAO', config[chainId].dao.address)
   console.log(`DAO fetched: ${dao.address}\n`)
 
-  // Funder sends ETH to DAO treasury
-  transaction = await funder.sendTransaction({ to: dao.address, value: ether(1000) }) // 1,000 Ether
+  // Send remaining tokens to DAO treasury - 50%
+  transaction = await token.transfer(dao.address, tokens(1000000))
   await transaction.wait()
-  console.log(`Sent funds to dao treasury...\n`)
 
   for (var i = 0; i < 3; i++) {
     // Create proposal
     transaction = await dao
       .connect(investor1)
-      .createProposal(`Proposal ${i + 1}`, ether(100), recipient.address, `Description ${i + 1}`)
+      .createProposal(`Proposal ${i + 1}`, tokens(100000), recipient.address, `Description ${i + 1}`)
     await transaction.wait()
 
     // Up Vote 1
@@ -96,7 +91,7 @@ async function main() {
   // Create one more proposal
   transaction = await dao
     .connect(investor1)
-    .createProposal(`Proposal 4`, ether(100), recipient.address, `Description 4`)
+    .createProposal(`Proposal 4`, tokens(100000), recipient.address, `Description 4`)
   await transaction.wait()
 
   // Up Vote 1

@@ -28,9 +28,9 @@ describe('DAO', () => {
 
     // Deploy token
     const Token = await ethers.getContractFactory('Token')
-    token = await Token.deploy('Crypto Token', 'CT', '1000000')
+    token = await Token.deploy('Crypto Token', 'CT', '2000000')
 
-    // Send tokens to investors - each one gets 20%
+    // Send tokens to investors - 50% (each investor gets 10%)
     transaction = await token.connect(deployer).transfer(investor1.address, tokens(200000))
     await transaction.wait()
 
@@ -47,18 +47,18 @@ describe('DAO', () => {
     await transaction.wait()
 
     // Deploy DAO
-    // Set quorum to > 50% of total token supply:
+    // Set quorum to > 25% of total token supply:
     // 500k tokens + 1 wei, i.e., 500000000000000000000001
     const DAO = await ethers.getContractFactory('DAO')
     dao = await DAO.deploy(token.address, '500000000000000000000001')
 
-    // Funder sends 100 ETH to DAO treasury for governance
-    await funder.sendTransaction({ to: dao.address, value: ether(100) })
+    // Send remaining tokens to DAO treasury - 50%
+    transaction = await token.connect(deployer).transfer(dao.address, tokens(1000000))
   })
 
   describe('Deployment', () => {
-    it('sends ether to the DAO treasury', async () => {
-      expect(await ethers.provider.getBalance(dao.address)).to.equal(ether(100))
+    it('sends Crypto Token (CT) to the DAO treasury', async () => {
+      expect(await token.balanceOf(dao.address)).to.equal(tokens(1000000))
     })
 
     it('has correct name', async () => {
@@ -77,7 +77,7 @@ describe('DAO', () => {
       beforeEach(async () => {
         transaction = await dao
           .connect(investor1)
-          .createProposal('Proposal 1', ether(100), recipient.address, 'Description 1')
+          .createProposal('Proposal 1', tokens(100), recipient.address, 'Description 1')
         result = await transaction.wait()
       })
 
@@ -89,26 +89,26 @@ describe('DAO', () => {
         const proposal = await dao.proposals(1)
 
         expect(proposal.id).to.equal(1)
-        expect(proposal.amount).to.equal(ether(100))
+        expect(proposal.amount).to.equal(tokens(100))
         expect(proposal.recipient).to.equal(recipient.address)
       })
 
       it('emits a propose event', async () => {
         await expect(transaction)
           .to.emit(dao, 'Propose')
-          .withArgs(1, ether(100), recipient.address, investor1.address, 'Description 1')
+          .withArgs(1, tokens(100), recipient.address, investor1.address, 'Description 1')
       })
     })
 
     describe('Failure', () => {
-      it('rejects invalid amount', async () => {
+      it('rejects invalid amount - not enough funds in DAO', async () => {
         await expect(
-          dao.connect(investor1).createProposal('Proposal 1', ether(1000), recipient.address, 'Description 1')
+          dao.connect(investor1).createProposal('Proposal 1', tokens(1000001), recipient.address, 'Description 1')
         ).to.be.reverted
       })
 
       it('rejects non-investor', async () => {
-        await expect(dao.connect(user).createProposal('Proposal 1', ether(100), recipient.address, 'Description 1')).to
+        await expect(dao.connect(user).createProposal('Proposal 1', tokens(100), recipient.address, 'Description 1')).to
           .be.reverted
       })
     })
@@ -120,7 +120,7 @@ describe('DAO', () => {
     beforeEach(async () => {
       transaction = await dao
         .connect(investor1)
-        .createProposal('Proposal 1', ether(100), recipient.address, 'Description 1')
+        .createProposal('Proposal 1', tokens(100), recipient.address, 'Description 1')
       result = await transaction.wait()
     })
 
@@ -160,7 +160,7 @@ describe('DAO', () => {
     beforeEach(async () => {
       transaction = await dao
         .connect(investor1)
-        .createProposal('Proposal 1', ether(100), recipient.address, 'Description 1')
+        .createProposal('Proposal 1', tokens(100), recipient.address, 'Description 1')
       result = await transaction.wait()
     })
 
@@ -205,7 +205,7 @@ describe('DAO', () => {
         // Create proposal
         transaction = await dao
           .connect(investor1)
-          .createProposal('Proposal 1', ether(100), recipient.address, 'Description 1')
+          .createProposal('Proposal 1', tokens(100), recipient.address, 'Description 1')
         result = await transaction.wait()
 
         // Up Vote
@@ -224,7 +224,7 @@ describe('DAO', () => {
       })
 
       it('transfers funds to recipient', async () => {
-        expect(await ethers.provider.getBalance(recipient.address)).to.equal(ether(10100))
+        expect(await token.balanceOf(recipient.address)).to.equal(tokens(100))
       })
 
       it('updates the proposal to finalize', async () => {
@@ -242,7 +242,7 @@ describe('DAO', () => {
         // Create proposal
         transaction = await dao
           .connect(investor1)
-          .createProposal('Proposal 1', ether(100), recipient.address, 'Description 1')
+          .createProposal('Proposal 1', tokens(100), recipient.address, 'Description 1')
         result = await transaction.wait()
 
         // Up Vote

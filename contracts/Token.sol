@@ -3,6 +3,8 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
+/// @title ERC20 Token Contract
+/// @notice A contract for a standard ERC20 token
 contract Token {
     string public name;
     string public symbol;
@@ -24,6 +26,10 @@ contract Token {
         uint256 value
     );
 
+    /// @notice Constructor for creating the token
+    /// @param _name The name of the token
+    /// @param _symbol The symbol of the token
+    /// @param _totalSupply The total supply of tokens
     constructor(
         string memory _name,
         string memory _symbol,
@@ -35,6 +41,10 @@ contract Token {
         balanceOf[msg.sender] = totalSupply;
     }
 
+    /// @notice Transfer tokens to another address
+    /// @param _to The address to transfer to
+    /// @param _value The amount of tokens to transfer
+    /// @return success A boolean that indicates if the operation was successful.
     function transfer(address _to, uint256 _value)
         public
         returns (bool success)
@@ -46,6 +56,10 @@ contract Token {
         return true;
     }
 
+    /// @notice Internal function to transfer tokens
+    /// @param _from The address to transfer from
+    /// @param _to The address to transfer to
+    /// @param _value The amount of tokens to transfer
     function _transfer(
         address _from,
         address _to,
@@ -59,6 +73,10 @@ contract Token {
         emit Transfer(_from, _to, _value);
     }
 
+    /// @notice Approve another address to spend tokens
+    /// @param _spender The address to approve
+    /// @param _value The amount of tokens to approve
+    /// @return success A boolean that indicates if the operation was successful.
     function approve(address _spender, uint256 _value)
         public
         returns(bool success)
@@ -71,6 +89,10 @@ contract Token {
         return true;
     }
 
+    /// @notice Transfer tokens from one address to another
+    /// @param _from The address to transfer from
+    /// @param _to The address to transfer to
+    /// @param _value The amount of tokens to transfer
     function transferFrom(
         address _from,
         address _to,
