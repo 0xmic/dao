@@ -35,11 +35,14 @@ function App() {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     setProvider(provider)
 
+    // Get chainId
+    const { chainId } = await provider.getNetwork()
+
     // Initiate contracts
-    const token = new ethers.Contract(config[31337].token.address, TOKEN_ABI, provider)
+    const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, provider)
     setToken(token)
 
-    const dao = new ethers.Contract(config[31337].dao.address, DAO_ABI, provider)
+    const dao = new ethers.Contract(config[chainId].dao.address, DAO_ABI, provider)
     setDao(dao)
 
     // Fetch treasury balance

@@ -61,43 +61,43 @@ const Proposals = ({ provider, dao, proposals, quorum, account, userVotes, setUs
     <Table striped bordered hover responsive>
       <thead>
         <tr>
-          <th>#</th>
-          <th>Proposal Name</th>
-          <th>Recipient Address</th>
-          <th>Amount</th>
-          <th>Description</th>
-          <th>Status</th>
-          <th>Total Votes</th>
-          <th>Up Vote</th>
-          <th>Down Vote</th>
-          <th>Finalize</th>
+          <th className='text-center'>#</th>
+          <th className='text-center'>Proposal Name</th>
+          <th className='text-center'>Recipient Address</th>
+          <th className='text-center'>Amount</th>
+          <th className='text-center'>Description</th>
+          <th className='text-center'>Status</th>
+          <th className='text-center'>Total Votes</th>
+          <th className='text-center'>Upvote</th>
+          <th className='text-center'>Downvote</th>
+          <th className='text-center'>Finalize</th>
         </tr>
       </thead>
       <tbody>
         {proposals.map((proposal, index) => (
           <tr key={index}>
-            <td>{proposal.id.toString()}</td>
-            <td>{proposal.name}</td>
-            <td>{proposal.recipient}</td>
-            <td>{ethers.utils.formatUnits(proposal.amount, 'ether')} CT</td>
-            <td>{proposal.description}</td>
-            <td>{proposal.finalized ? 'Approved' : 'In Progress'}</td>
-            <td>{proposal.votes.toString()}</td>
-            <td>
+            <td className='text-center'>{proposal.id.toString()}</td>
+            <td className='text-center'>{proposal.name}</td>
+            <td className='text-center'>{proposal.recipient}</td>
+            <td className='text-center'>{ethers.utils.formatUnits(proposal.amount, 'ether')} CT</td>
+            <td className='text-center'>{proposal.description}</td>
+            <td className='text-center'>{proposal.finalized ? 'Approved' : 'In Progress'}</td>
+            <td className='text-center'>{ethers.utils.formatUnits(proposal.votes, 18).toString()}</td>
+            <td className='text-center'>
               {!proposal.finalized && !userVotes[proposal.id] && (
                 <Button variant='primary' style={{ width: '100%' }} onClick={() => upVoteHandler(proposal.id)}>
-                  Up Vote
+                  👍
                 </Button>
               )}
             </td>
-            <td>
+            <td className='text-center'>
               {!proposal.finalized && !userVotes[proposal.id] && (
                 <Button variant='primary' style={{ width: '100%' }} onClick={() => downVoteHandler(proposal.id)}>
-                  Down Vote
+                  👎
                 </Button>
               )}
             </td>
-            <td>
+            <td className='text-center'>
               {!proposal.finalized && proposal.votes > quorum && (
                 <Button variant='primary' style={{ width: '100%' }} onClick={() => finalizeHandler(proposal.id)}>
                   Finalize

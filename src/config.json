@@ -6,5 +6,21 @@
     "dao": {
       "address": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512"
     }
+  },
+  "11155111": {
+    "token": {
+      "address": "0x3d49dbC9f4AEe437b28E85bEF33f2CC8b46F2966"
+    },
+    "dao": {
+      "address": "0x07BD4e1B8A9332A3BbD4750E7A26E28db64310B4"
+    }
+  },
+  "80001": {
+    "token": {
+      "address": "0xd6a1B2b5A4c339Bf5f2e24aB5ADD7aE4E7f229B4"
+    },
+    "dao": {
+      "address": "0xcb6D0B1D980E0eC174Dc2f4B4981Df3ECDc8Dfb9"
+    }
   }
 }
