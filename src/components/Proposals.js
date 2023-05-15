@@ -1,8 +1,23 @@
+import { useEffect } from 'react'
 import Table from 'react-bootstrap/Table'
 import Button from 'react-bootstrap/Button'
 import { ethers } from 'ethers'
 
-const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
+const Proposals = ({ provider, dao, proposals, quorum, account, userVotes, setUserVotes, setIsLoading }) => {
+  useEffect(() => {
+    // Fetch user votes for each proposal
+    const fetchUserVotes = async () => {
+      let newVotes = {}
+      for (let i = 0; i < proposals.length; i++) {
+        const hasVoted = await dao.votes(account, proposals[i].id)
+        newVotes[proposals[i].id] = hasVoted
+      }
+      setUserVotes(newVotes)
+    }
+
+    fetchUserVotes()
+  }, [dao, proposals, account, setUserVotes])
+
   const upVoteHandler = async (id) => {
     try {
       const signer = await provider.getSigner()
@@ -13,6 +28,7 @@ const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
     }
 
     setIsLoading(true)
+    setUserVotes({ ...userVotes, [id]: true })
   }
 
   const downVoteHandler = async (id) => {
@@ -25,6 +41,7 @@ const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
     }
 
     setIsLoading(true)
+    setUserVotes({ ...userVotes, [id]: true })
   }
 
   const finalizeHandler = async (id) => {
@@ -37,6 +54,7 @@ const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
     }
 
     setIsLoading(true)
+    setUserVotes({ ...userVotes, [id]: true })
   }
 
   return (
@@ -66,14 +84,14 @@ const Proposals = ({ provider, dao, proposals, quorum, setIsLoading }) => {
             <td>{proposal.finalized ? 'Approved' : 'In Progress'}</td>
             <td>{proposal.votes.toString()}</td>
             <td>
-              {!proposal.finalized && (
+              {!proposal.finalized && !userVotes[proposal.id] && (
                 <Button variant='primary' style={{ width: '100%' }} onClick={() => upVoteHandler(proposal.id)}>
                   Up Vote
                 </Button>
               )}
             </td>
             <td>
-              {!proposal.finalized && (
+              {!proposal.finalized && !userVotes[proposal.id] && (
                 <Button variant='primary' style={{ width: '100%' }} onClick={() => downVoteHandler(proposal.id)}>
                   Down Vote
                 </Button>
