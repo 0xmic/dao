@@ -98,11 +98,12 @@ const Proposals = ({ provider, dao, proposals, quorum, account, userVotes, setUs
               )}
             </td>
             <td className='text-center'>
-              {!proposal.finalized && proposal.votes > quorum && (
-                <Button variant='primary' style={{ width: '100%' }} onClick={() => finalizeHandler(proposal.id)}>
-                  Finalize
-                </Button>
-              )}
+              {!proposal.finalized &&
+                parseFloat(ethers.utils.formatUnits(proposal.votes, 18).toString()) > parseFloat(quorum) && (
+                  <Button variant='primary' style={{ width: '100%' }} onClick={() => finalizeHandler(proposal.id)}>
+                    Finalize
+                  </Button>
+                )}
             </td>
           </tr>
         ))}
