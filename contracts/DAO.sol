@@ -4,14 +4,15 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 import './Token.sol';
 
-/// @title DAO Contract
-/// @notice A contract for decentralized autonomous organizations
+/* @title DAO Contract
+ * @notice A contract for decentralized autonomous organizations
+ */
 contract DAO {
     address owner;
     Token public token;
     uint256 public quorum;
 
-    /// @notice Structure for proposals
+    /* @notice Structure for proposals */
     struct Proposal {
         uint256 id;
         string name;
@@ -40,26 +41,28 @@ contract DAO {
 
     event Finalize(uint256 id);
 
-    /// @notice Constructor for creating the DAO
-    /// @param _token The token used for the DAO
-    /// @param _quorum The minimum number of votes required for a proposal to pass
+    /* @notice Constructor for creating the DAO
+     * @param _token The token used for the DAO
+     * @param _quorum The minimum number of votes required for a proposal to pass
+     */
     constructor(Token _token, uint256 _quorum) {
         owner = msg.sender;
         token = _token;
         quorum = _quorum;
     }
 
-    /// @notice Modifier to ensure the function caller is a token holder
+    /* @notice Modifier to ensure the function caller is a token holder */
     modifier onlyInvestor() {
         require(token.balanceOf(msg.sender) > 0, "Must be token holder");
         _;
     }
 
-    /// @notice Create a new proposal
-    /// @param _name The name of the proposal
-    /// @param _amount The amount of tokens requested
-    /// @param _recipient The address where funds will be sent if the proposal is approved
-    /// @param _description The details of the proposal
+    /* @notice Create a new proposal
+     * @param _name The name of the proposal
+     * @param _amount The amount of tokens requested
+     * @param _recipient The address where funds will be sent if the proposal is approved
+     * @param _description The details of the proposal
+     */
     function createProposal(
         string memory _name,
         uint256 _amount,
@@ -83,8 +86,9 @@ contract DAO {
         emit Propose(proposalCount, _amount, _recipient, msg.sender, _description);
     }
 
-    /// @notice Upvote a proposal
-    /// @param _id The ID of the proposal
+    /* @notice Upvote a proposal
+     * @param _id The ID of the proposal
+     */
     function upVote(uint256 _id) external onlyInvestor {
         Proposal storage proposal = proposals[_id];
 
@@ -97,8 +101,9 @@ contract DAO {
         emit UpVote(_id, msg.sender);
     }
 
-    /// @notice Downvote a proposal
-    /// @param _id The ID of the proposal
+    /* @notice Downvote a proposal
+     * @param _id The ID of the proposal
+     */
     function downVote(uint256 _id) external onlyInvestor {
         Proposal storage proposal = proposals[_id];
 
@@ -111,8 +116,9 @@ contract DAO {
         emit DownVote(_id, msg.sender);
     }
 
-    /// @notice Finalize a proposal
-    /// @param _id The ID of the proposal to finalize
+    /* @notice Finalize a proposal
+     * @param _id The ID of the proposal to finalize
+     */
     function finalizeProposal(uint256 _id) external onlyInvestor {
         Proposal storage proposal = proposals[_id];
 
