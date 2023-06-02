@@ -139,6 +139,7 @@ describe('Token', () => {
       })
 
       it('emits a Transfer event', async () => {
+        console.log('result: ', result)
         const event = result.events[0]
         expect(event.event).to.equal('Transfer')
 
