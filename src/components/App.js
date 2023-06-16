@@ -73,7 +73,7 @@ function App() {
 
     // Fetch user votes for each proposal
     let userVotes = {}
-    for (var j = 0; i < count; j++) {
+    for (var j = 0; j < count; j++) {
       const hasVoted = await dao.votes(account, j + 1)
       userVotes[j + 1] = hasVoted
     }
